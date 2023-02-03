@@ -5,14 +5,21 @@ import openai
 import json
 import urllib.request
 from gtts import gTTS
-from io import BytesIO
+import psutil
 from pydub import AudioSegment
 from pydub.playback import play
 
 from PIL import Image
 
+from mutagen.mp3 import MP3
+import imageio
+from moviepy.editor import TextClip, CompositeVideoClip, concatenate_videoclips,VideoFileClip, AudioFileClip, ImageClip
+from moviepy.video.tools.subtitles import SubtitlesClip
+from pathlib import Path
+
 openai.api_key = os.environ["OPEN_AI_KEY"]
 
+config = json.load(open("config.json", "r"))
 
 class InfiniteContent:
     def __init__(self, seed) -> None:
@@ -20,6 +27,7 @@ class InfiniteContent:
         self.seed = f"write an episode of {seed} with dialogue"
         self.continuation = ""
         self.context = []
+        self.scene_paths = []
 
     def generate_image(self, text, model=None):
         if len(text) > 200:
@@ -27,18 +35,17 @@ class InfiniteContent:
         response = openai.Image.create(
             prompt=f"scene from {self.show}: {text}",
             n=1,
-            size="256x256",
+            size="x".join([str(x) for x in config["size"]]),
         )
-        filename = f"images/{datetime.timestamp(datetime.now())}.png"
+        filename = f"image/{self.get_unique_id()}.png"
         urllib.request.urlretrieve(response["data"][0]["url"], filename)
-        img = Image.open(filename)
 
-        return img
+        return filename
 
     def generate_gpt3_response(self, text, model=None):
         completions = openai.Completion.create(
             engine='text-davinci-003',
-            temperature=0.7,
+            temperature=config["temperature"],
             prompt=text,
             max_tokens=1000,
             n=1,
@@ -79,52 +86,95 @@ class InfiniteContent:
         except AssertionError:
             return None
 
-        mp3_fp = BytesIO()
-        voice_obj.write_to_fp(mp3_fp)
-        mp3_fp.seek(0)
+        file = f"audio/{self.get_unique_id()}.mp3"
+        voice_obj.save(file)
 
-        return mp3_fp
+        return file
 
     def play(self, voice, image, text):
         print(f"\n\n{text}\n\n")
-        image.show()
+        img = Image.open(image)
+        img.show()
         if voice is not None:
-            audio = AudioSegment.from_file(voice, format="mp3")
+            audio = AudioSegment.from_file(open(voice, 'rb'), format="mp3")
             play(audio)
         else:
             time.sleep(2)
-        image.close()
+        # hide image
+        for proc in psutil.process_iter():
+            if proc.name() == "display":
+                proc.kill()
+        img.close()
+        self.generate_scene(voice, image, text)
+
+    def generate_scene(self, voice, image, text):
+        if voice is not None:
+            audio = MP3(voice)
+            duration = audio.info.length
+            audio = AudioFileClip(voice)
+        else:
+            duration = 1000
+
+        video = ImageClip(image, duration=duration)
+        
+        final_video = video.set_audio(audio) if voice is not None else video
+        
+        gen = lambda txt: TextClip(txt, font='Arial', fontsize=24, color='white', method='caption', size=tuple(config['size']))
+        subs = [((0, duration), text)]
+        subtitle_clip = SubtitlesClip(subs, gen)
+        final_video = CompositeVideoClip([final_video, subtitle_clip.set_pos(('center','bottom'))])
+        path = f"scenes/{self.get_unique_id()}.mp4"
+        final_video.write_videofile(fps=60, codec="libx264", filename=path)
+        self.scene_paths.append(path)
+
+    def join_scenes(self):
+        final_video = concatenate_videoclips([VideoFileClip(x) for x in self.scene_paths])
+        final_video.write_videofile(fps=60, codec="libx264", filename=f"results/{self.show}-{self.get_unique_id()}.mp4")
+    
+    def get_unique_id(self):
+        return f"{self.show}_{datetime.timestamp(datetime.now())}".replace('.','')
 
     def main(self):
-        while True:
-            completion = self.generate_gpt3_response(
-                self.continuation+self.seed)
-            self.continuation = ""
-            lines = completion.split("\n")
-            for n, line in enumerate(lines):
-                if line.replace(" ","") == "":
-                    continue
-                if len(line.split(":")) > 1:
-                    voice = self.get_voice(
-                        ":".join(line.split(":")[1:]), line.split(":")[0])
-                else:
-                    voice = self.get_voice(line, None)
-                    if len(self.context) > 3:
-                        self.context.pop(0)
-                    self.context.append(line)
-                context_text = '\n'.join(self.context)
-                image = self.generate_image(
-                    f"{self.seed}\n{context_text}\n{line}")
-                self.play(
-                    voice=voice,
-                    image=image,
-                    text=line
-                )
-                if n > (len(lines) - 4):
-                    self.continuation += f"\n{line}"
+        try:
+            while True:
+                completion = self.generate_gpt3_response(
+                    self.continuation+self.seed)
+                self.continuation = ""
+                lines = completion.split("\n")
+                for n, line in enumerate(lines):
+                    if line.replace(" ","") == "":
+                        continue
+                    if len(line.split(":")) > 1:
+                        voice = self.get_voice(
+                            ":".join(line.split(":")[1:]), line.split(":")[0])
+                    else:
+                        voice = self.get_voice(line, None)
+                        if len(self.context) > 3:
+                            self.context.pop(0)
+                        self.context.append(line)
+                    context_text = '\n'.join(self.context)
+                    image = self.generate_image(
+                        f"{self.seed}\n{context_text}\n{line}")
+                    self.play(
+                        voice=voice,
+                        image=image,
+                        text=line
+                    )
+                    if n > (len(lines) - 4):
+                        self.continuation += f"\n{line}"
 
-            self.continuation += "\n\n continue"
-
+                self.continuation += "\n\n continue"
+        except KeyboardInterrupt:
+            self.exit()
+    
+    def exit(self):
+        self.join_scenes()
+        if not config["keep_images"]:
+            os.system("rm image/*")
+        if not config["keep_audio"]:
+            os.system("rm audio/*")
+        if not config["keep_scenes"]:
+            os.system("rm scenes/*")
 
 if __name__ == "__main__":
     content = InfiniteContent(input("Seed: "))

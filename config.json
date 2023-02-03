@@ -1,0 +1,10 @@
+{
+    "temperature": 0.9,
+    "keep_images": false,
+    "keep_audio": false,
+    "keep_scenes": false,
+    "size": [
+        256,
+        256
+    ]
+}
