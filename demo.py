@@ -17,11 +17,13 @@ openai.api_key = os.environ["OPEN_AI_KEY"]
 class InfiniteContent:
     def __init__(self, seed) -> None:
         self.show = seed
-        self.seed = f"write an episode of {seed}"
+        self.seed = f"write an episode of {seed} with dialogue"
         self.continuation = ""
         self.context = []
 
     def generate_image(self, text, model=None):
+        if len(text) > 200:
+            text = text[:200]
         response = openai.Image.create(
             prompt=f"scene from {self.show}: {text}",
             n=1,
@@ -36,7 +38,7 @@ class InfiniteContent:
     def generate_gpt3_response(self, text, model=None):
         completions = openai.Completion.create(
             engine='text-davinci-003',
-            temperature=0.1,
+            temperature=0.7,
             prompt=text,
             max_tokens=1000,
             n=1,
