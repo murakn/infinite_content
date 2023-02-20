@@ -3,6 +3,53 @@
 <head>
     <title>File Upload Status Checker</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            background-color: #0072c6;
+            color: white;
+            padding: 10px;
+            margin: 0;
+        }
+
+        #status-message {
+            padding: 50px;
+            text-align: center;
+        }
+
+        #status-message img {
+            max-width: 100%;
+        }
+
+        #status-message.done img {
+            display: none;
+        }
+
+        #status-message.done:after {
+            content: "Episode complete!";
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #status-message.done a {
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+            color: #0072c6;
+            border: 2px solid #0072c6;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
     <script type="text/javascript">
         function checkFileStatus(filename) {
             $.ajax({
@@ -14,6 +61,9 @@
                 contentType: "application/json",
                 success: function(response) {
                     if (response.done) {
+                        // Add the "done" class to the status message
+                        $("#status-message").addClass("done");
+
                         // Create a new link element
                         var downloadLink = $("<a>");
 
@@ -23,8 +73,8 @@
                         // Set the link's text to "Download"
                         downloadLink.text("Download");
 
-                        // Add the link to the page
-                        $("body").append(downloadLink);
+                        // Add the link to the status message
+                        $("#status-message").append(downloadLink);
                     } else {
                         setTimeout(function() {
                             checkFileStatus(filename);
@@ -34,7 +84,6 @@
             });
         }
 
-
         $(document).ready(function() {
             // Extract the filename from the URL
             const filename = "{{ filename }}";
@@ -42,7 +91,6 @@
             // Check the status of the file upload using AJAX
             checkFileStatus(filename);
         });
-
     </script>
 </head>
 <body>

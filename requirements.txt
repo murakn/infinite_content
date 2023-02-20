@@ -15,7 +15,6 @@ moviepy==1.0.3
 mpg123==0.4
 multidict==6.0.4
 mutagen==1.46.0
-numpy==1.24.1
 openai==0.26.4
 Pillow==9.4.0
 playsound==1.3.0
