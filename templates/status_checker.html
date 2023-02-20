@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload Status Checker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        function checkFileStatus(filename) {
+            $.ajax({
+                type: "POST",
+                url: "/status/",
+                data: JSON.stringify({
+                    "filename": filename
+                }),
+                contentType: "application/json",
+                success: function(response) {
+                    if (response.done) {
+                        // Create a new link element
+                        var downloadLink = $("<a>");
+
+                        // Set the link's href attribute to the download URL
+                        downloadLink.attr("href", "/download/" + filename);
+
+                        // Set the link's text to "Download"
+                        downloadLink.text("Download");
+
+                        // Add the link to the page
+                        $("body").append(downloadLink);
+                    } else {
+                        setTimeout(function() {
+                            checkFileStatus(filename);
+                        }, 1000);
+                    }
+                }
+            });
+        }
+
+
+        $(document).ready(function() {
+            // Extract the filename from the URL
+            const filename = "{{ filename }}";
+
+            // Check the status of the file upload using AJAX
+            checkFileStatus(filename);
+        });
+
+    </script>
+</head>
+<body>
+    <h1>File Upload Status Checker</h1>
+    <div id="status-message">
+        <img src='https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif'>
+    </div>
+</body>
+</html>
