@@ -4,6 +4,8 @@ import threading
 import os
 import io
 
+os.system("apt install imagemagick")
+
 app = Flask(__name__)
 
 
