@@ -4,7 +4,7 @@ import threading
 import os
 import io
 
-os.system('export "PATH=$PWD/dir/usr/bin:$PATH"')
+os.system('export PATH="$PWD/dir/usr/bin:$PATH"')
 
 app = Flask(__name__)
 
