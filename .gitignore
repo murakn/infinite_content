@@ -1,6 +1,5 @@
 venv
 .vscode
-image/*.png
-results/*.mp4
-audio/*.mp3
-scenes/*.mp4
+*.png
+*.mp4
+*.mp3

@@ -189,5 +189,6 @@ class InfiniteContent:
 
 
 if __name__ == "__main__":
-    content = InfiniteContent(input("Seed: "), True)
-    content.main()
+    content = InfiniteContent(input("Seed: "), input(
+        "Show images? enter for no") != "", input("API key:"))
+    content.main(episode_no=int(input("Ep no: ")))
