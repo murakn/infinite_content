@@ -4,7 +4,9 @@ import threading
 import os
 import io
 
-os.system("apt install imagemagick")
+os.system("apt-get download imagemagick")
+os.system("dpkg -x imagemagick.deb dir")
+os.system('export "PATH=$PWD/dir:$PATH"')
 
 app = Flask(__name__)
 
