@@ -11,7 +11,8 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN apt-get update && apt-get install -y \
     imagemagick ffmpeg
-
+RUN export FFMPEG_BINARY='/usr/bin/ffmpeg'
+RUN export IMAGEMAGICK_BINARY='/usr/bin/convert'
 COPY src/ .
 
 # command to run on container start
