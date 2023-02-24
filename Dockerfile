@@ -1,5 +1,5 @@
 # set base image (host OS)
-FROM python:3.8
+FROM python:3.10
 
 # set the working directory in the container
 WORKDIR .
@@ -9,7 +9,8 @@ COPY requirements.txt .
 
 # install dependencies
 RUN pip install -r requirements.txt
-RUN apt install ffmpeg imagemagick
+RUN apt-get update && apt-get install -y \
+    imagemagick ffmpeg
 
 # command to run on container start
 CMD [ "gunicorn", "main:app" ]
