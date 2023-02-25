@@ -24,7 +24,7 @@ config = json.load(open("config.json", "r"))
 class InfiniteContent:
     def __init__(self, seed, display, api_key) -> None:
         self.show = seed
-        self.seed = f"write an episode of {seed} with dialogue"
+        self.seed = f"write me a story titled '{seed}' with dialogue"
         self.continuation = ""
         self.context = []
         self.scene_paths = []
