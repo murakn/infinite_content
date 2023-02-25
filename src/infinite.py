@@ -30,6 +30,8 @@ class InfiniteContent:
         self.scene_paths = []
         self.display = display
         self.filename = f"{self.show}-{self.get_unique_id()}.mp4".replace(" ", "_")
+        self.scene_count = 0
+
         openai.api_key = api_key
 
     def generate_image(self, text, model=None):
@@ -167,6 +169,7 @@ class InfiniteContent:
                     )
 
                 self.generate_scene(voice, image, line)
+                self.scene_count += 1
 
                 if n > (len(lines) - 4):
                     self.continuation += f"\n{line}"

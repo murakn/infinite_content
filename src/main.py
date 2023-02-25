@@ -26,7 +26,7 @@ def generate_episode():
     t = threading.Thread(target=content.main, kwargs={
                          'episode_no': episode_no})
     t.start()
-    threads[filename] = t
+    threads[filename] = [t, content]
 
     return redirect(f"/status_check/{filename}")
 
@@ -51,9 +51,11 @@ def status():
     data = request.json
     filename = data['filename']
 
+    thread, obj = tuple(threads[filename])
     # Process the data and prepare a response
     response_data = {
-        'done': not threads[filename].is_alive()
+        'done': not thread.is_alive(),
+        'scene_count': obj.scene_count
     }
 
     # Return a JSON response
