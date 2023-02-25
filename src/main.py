@@ -6,6 +6,8 @@ import io
 
 app = Flask(__name__)
 
+threads = {}
+
 
 @app.route('/', methods=['GET'])
 def get_root():
@@ -24,6 +26,7 @@ def generate_episode():
     t = threading.Thread(target=content.main, kwargs={
                          'episode_no': episode_no})
     t.start()
+    threads[filename] = t
 
     return redirect(f"/status_check/{filename}")
 
@@ -50,7 +53,7 @@ def status():
 
     # Process the data and prepare a response
     response_data = {
-        'done': os.path.exists(f"results/{filename}")
+        'done': not threads[filename].is_alive()
     }
 
     # Return a JSON response
