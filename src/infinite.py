@@ -121,12 +121,12 @@ class InfiniteContent:
 
         final_video = video.set_audio(audio) if voice is not None else video
 
-        def gen(txt): return TextClip(txt, font='Arial', fontsize=24,
-                                      color='white', method='caption', size=tuple(config['size']))
-        subs = [((0, duration), text)]
-        subtitle_clip = SubtitlesClip(subs, gen)
-        final_video = CompositeVideoClip(
-            [final_video, subtitle_clip.set_pos(('center', 'bottom'))])
+        # def gen(txt): return TextClip(txt, font='Arial', fontsize=24,
+        #                               color='white', method='caption', size=tuple(config['size']))
+        # subs = [((0, duration), text)]
+        # subtitle_clip = SubtitlesClip(subs, gen)
+        # final_video = CompositeVideoClip(
+        #     [final_video, subtitle_clip.set_pos(('center', 'bottom'))])
         path = f"scenes/{self.get_unique_id()}.mp4"
         final_video.write_videofile(fps=60, codec="libx264", filename=path)
         self.scene_paths.append(path)
@@ -150,14 +150,12 @@ class InfiniteContent:
             for n, line in enumerate(lines):
                 if line.replace(" ", "") == "":
                     continue
-                if len(line.split(":")) > 1:
-                    voice = self.get_voice(
-                        ":".join(line.split(":")[1:]), line.split(":")[0])
-                else:
-                    voice = self.get_voice(line, None)
+                if len(line.split(":")) == 0:
                     if len(self.context) > 3:
                         self.context.pop(0)
                     self.context.append(line)
+
+                voice = self.get_voice(line, None)
                 context_text = '\n'.join(self.context)
                 image = self.generate_image(
                     f"{self.seed}\n{context_text}\n{line}")

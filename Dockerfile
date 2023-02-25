@@ -8,7 +8,7 @@ WORKDIR /code
 COPY requirements.txt .
 
 # install dependencies
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --default-timeout=100
 RUN apt-get update && apt-get install -y \
     imagemagick ffmpeg
 RUN sed -i '/<policy domain="path" rights="none" pattern="@\*"/d' /etc/ImageMagick-6/policy.xml
