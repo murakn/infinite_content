@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>File Upload Status Checker</title>
+    <title>Infinite Content</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            background-color: #f5f5f5;
         }
-
         h1 {
-            background-color: #0072c6;
-            color: white;
-            padding: 10px;
-            margin: 0;
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 30px;
         }
 
         #status-message {
-            padding: 50px;
             text-align: center;
+            margin-top: 50px;
+            margin-bottom: 30px;
         }
 
         #status-message img {
@@ -48,6 +46,43 @@
             padding: 5px 10px;
             border-radius: 5px;
             font-weight: bold;
+        }
+
+        form {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            width: 50%;
+            margin: 0 auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #3e8e41;
         }
     </style>
     <script type="text/javascript">
@@ -94,7 +129,7 @@
     </script>
 </head>
 <body>
-    <h1>File Upload Status Checker</h1>
+    <h1><a href="../">Generating episode...</a></h1>
     <div id="status-message">
         <img src='https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif'>
     </div>
